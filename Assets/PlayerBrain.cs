@@ -1,0 +1,74 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerBrain : MonoBehaviour
+{
+    //player stuff
+    public GameObject rig;
+    public Vector3 rigoffset;
+    public CharacterController controller;
+    public float speed = 4f;
+
+    //internal variables accessible across the script
+    private Vector3 movement;
+    private float speed_y = 0f; 
+    
+    // Start is called before the first frame update
+    void Start()
+    {
+    }
+
+    // Update is called once per frame
+    void Update()
+    {   //initialize movement direction
+        movement = Vector3.zero;
+        PlayerMove();
+        Gravity(movement);
+    }
+
+    private void PlayerMove()
+    {
+        //input stuff that tells the camera rig where the player is heading
+        if (Input.GetKey(KeyCode.W)) movement += rig.transform.forward;
+        if (Input.GetKey(KeyCode.A)) movement -= rig.transform.right;
+        if (Input.GetKey(KeyCode.S)) movement -= rig.transform.forward;
+        if (Input.GetKey(KeyCode.D)) movement += rig.transform.right;
+
+        //keep movement horizontal
+        movement.y = 0f;
+        
+        //calculate camera offset
+        Vector3 camerafinalposition = transform.position + rigoffset;
+        
+        //camera follow
+        rig.transform.position = Vector3.Lerp(rig.transform.position, camerafinalposition, 1f - Mathf.Exp(-5f * Time.deltaTime));
+        
+        //if the player is actually inputting something in via wasd
+        if (movement != Vector3.zero)
+        {
+            //ensure diagonal movement speed is the same as nondiagonal
+            movement.Normalize();
+            //make player face the movement direction
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(movement), 10f * Time.deltaTime);
+        }
+    }
+
+    private void Gravity(Vector3 vector)
+    {
+        if (controller.isGrounded)
+        {
+            //stay on the ground when grounded
+            speed_y = -2f;
+        }
+        else
+        {
+            speed_y += -12f * Time.deltaTime;
+        }
+        
+        //calculate gravity
+        Vector3 finalmove = (vector * speed) + new Vector3(0f, speed_y, 0f);
+        //apply by moving the player + applied gravity
+        controller.Move(finalmove* Time.deltaTime);
+    }
+}
