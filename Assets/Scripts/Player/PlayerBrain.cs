@@ -9,6 +9,9 @@ public class PlayerBrain : MonoBehaviour
     public Vector3 rigoffset;
     public CharacterController controller;
     public float speed = 4f;
+    //never make gravitystrength negative!!! it does that in the code already
+    public float gravitystrength = 12f;
+    public float cameraspeed = -5f;
 
     //internal variables accessible across the script
     private Vector3 movement;
@@ -17,6 +20,7 @@ public class PlayerBrain : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        InitializeComponents();
     }
 
     // Update is called once per frame
@@ -27,6 +31,13 @@ public class PlayerBrain : MonoBehaviour
         Gravity(movement);
     }
 
+    //try and call all needed requirements by calling this
+    private void InitializeComponents()
+    {
+        if(controller == null) { TryGetComponent<CharacterController>(out controller); }
+    }
+    
+    //this allows the player move and everything (this allows the player to move but gravity executes the final Move call)
     private void PlayerMove()
     {
         //input stuff that tells the camera rig where the player is heading
@@ -42,7 +53,7 @@ public class PlayerBrain : MonoBehaviour
         Vector3 camerafinalposition = transform.position + rigoffset;
         
         //camera follow
-        rig.transform.position = Vector3.Lerp(rig.transform.position, camerafinalposition, 1f - Mathf.Exp(-5f * Time.deltaTime));
+        rig.transform.position = Vector3.Lerp(rig.transform.position, camerafinalposition, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
         
         //if the player is actually inputting something in via wasd
         if (movement != Vector3.zero)
@@ -54,6 +65,7 @@ public class PlayerBrain : MonoBehaviour
         }
     }
 
+    //this applies the vertical gravity on the player, it also allows the player to actually move
     private void Gravity(Vector3 vector)
     {
         if (controller.isGrounded)
@@ -63,7 +75,9 @@ public class PlayerBrain : MonoBehaviour
         }
         else
         {
-            speed_y += -12f * Time.deltaTime;
+            //apply physics on player via modifying the vertical speed
+            float gravity = gravitystrength * -1;
+            speed_y += gravity * Time.deltaTime;
         }
         
         //calculate gravity
