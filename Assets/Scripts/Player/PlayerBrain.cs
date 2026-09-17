@@ -15,7 +15,15 @@ public class PlayerBrain : MonoBehaviour
 
     //internal variables accessible across the script
     private Vector3 movement;
-    private float speed_y = 0f; 
+    private float speed_y = 0f;
+    
+    //this is for the double press in the WallAttach function
+    private float timebetweenpress = 0.25f;
+    private float lasttimepressed = -999f;
+    
+    //bools to control what the player can or cant do
+    public bool canmove = true;
+    public bool wallglued = false;
     
     // Start is called before the first frame update
     void Start()
@@ -29,6 +37,9 @@ public class PlayerBrain : MonoBehaviour
         movement = Vector3.zero;
         PlayerMove();
         Gravity(movement);
+        WallAttach();
+        
+        Debug.DrawRay(transform.position, Vector3.forward, Color.green);
     }
 
     //try and call all needed requirements by calling this
@@ -41,10 +52,13 @@ public class PlayerBrain : MonoBehaviour
     private void PlayerMove()
     {
         //input stuff that tells the camera rig where the player is heading
-        if (Input.GetKey(KeyCode.W)) movement += rig.transform.forward;
-        if (Input.GetKey(KeyCode.A)) movement -= rig.transform.right;
-        if (Input.GetKey(KeyCode.S)) movement -= rig.transform.forward;
-        if (Input.GetKey(KeyCode.D)) movement += rig.transform.right;
+        if (canmove)
+        {
+            if (Input.GetKey(KeyCode.W)) movement += rig.transform.forward;
+            if (Input.GetKey(KeyCode.A)) movement -= rig.transform.right;
+            if (Input.GetKey(KeyCode.S)) movement -= rig.transform.forward;
+            if (Input.GetKey(KeyCode.D)) movement += rig.transform.right;
+        }
 
         //keep movement horizontal
         movement.y = 0f;
@@ -61,7 +75,7 @@ public class PlayerBrain : MonoBehaviour
             //ensure diagonal movement speed is the same as nondiagonal
             movement.Normalize();
             //make player face the movement direction
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(movement), 10f * Time.deltaTime);
+            if(canmove) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(movement), 10f * Time.deltaTime);
         }
     }
 
@@ -83,6 +97,66 @@ public class PlayerBrain : MonoBehaviour
         //calculate gravity
         Vector3 finalmove = (vector * speed) + new Vector3(0f, speed_y, 0f);
         //apply by moving the player + applied gravity
-        controller.Move(finalmove* Time.deltaTime);
+        if(canmove) controller.Move(finalmove* Time.deltaTime);
+    }
+    
+    //the wall gluing thing
+    private void WallAttach()
+    {
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 0.75f))
+        {
+            if (hit.transform.tag == "Wall")
+            {
+                Debug.Log("player is infront of a wall");
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    //check if press is within double press window
+                    if (Time.time - lasttimepressed <= timebetweenpress)
+                    {
+                        Debug.Log("attach logic triggered");
+                        //execute what to change here
+                        canmove = false;
+                        wallglued = true;
+                        transform.forward = -hit.normal;
+                        
+                        //reset time and prevent anything beyond a double press
+                        lasttimepressed = -999f;
+                    }
+                    else
+                    {
+                        //if this is the first press make sure a double press can be executed
+                        lasttimepressed = Time.time;
+                    }
+                }
+                if (wallglued && Input.GetKey(KeyCode.D))
+                {
+                    controller.transform.position += transform.right / 75f;
+                }
+                if (wallglued && Input.GetKey(KeyCode.A))
+                {
+                    controller.transform.position -= transform.right / 75f;
+                }
+                
+                //leave wall execution
+                if (wallglued && Input.GetKeyDown(KeyCode.S))
+                {
+                    //double press
+                    if (Time.time - lasttimepressed <= timebetweenpress)
+                    {
+                        wallglued = false;
+                        canmove = true;
+                    }
+                    else
+                    {
+                        lasttimepressed = Time.time;
+                    }
+                }
+            }
+        }
+        else
+        {
+            wallglued = false;
+            canmove = true;
+        }
     }
 }
