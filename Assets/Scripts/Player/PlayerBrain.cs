@@ -39,7 +39,7 @@ public class PlayerBrain : MonoBehaviour
         Gravity(movement);
         WallAttach();
         
-        Debug.DrawRay(transform.position, Vector3.forward, Color.green);
+        Debug.DrawRay(transform.position, transform.forward, Color.green);
     }
 
     //try and call all needed requirements by calling this
@@ -130,11 +130,11 @@ public class PlayerBrain : MonoBehaviour
                 }
                 if (wallglued && Input.GetKey(KeyCode.D))
                 {
-                    controller.transform.position += transform.right / 75f;
+                    controller.transform.position += rig.transform.right * 2f * Time.deltaTime;
                 }
                 if (wallglued && Input.GetKey(KeyCode.A))
                 {
-                    controller.transform.position -= transform.right / 75f;
+                    controller.transform.position -= rig.transform.right * 2f * Time.deltaTime;
                 }
                 
                 //leave wall execution
