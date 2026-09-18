@@ -24,6 +24,9 @@ public class PlayerBrain : MonoBehaviour
     //bools to control what the player can or cant do
     public bool canmove = true;
     public bool wallglued = false;
+
+    //IMPORTANT used to get the wall normals
+    private Vector3 attachedWallNormal;
     
     // Start is called before the first frame update
     void Start()
@@ -103,11 +106,14 @@ public class PlayerBrain : MonoBehaviour
     //the wall gluing thing
     private void WallAttach()
     {
-        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 0.75f))
+        //If the player is glued to the wall shoots the raycast on the back of the player
+        Vector3 rayDirection = wallglued ? -attachedWallNormal : transform.forward;
+
+        if (Physics.Raycast(transform.position, rayDirection, out RaycastHit hit, 0.75f))
         {
             if (hit.transform.tag == "Wall")
             {
-                Debug.Log("player is infront of a wall");
+                if(!wallglued){Debug.Log("player is infront of a wall");}
                 if (Input.GetKeyDown(KeyCode.E))
                 {
                     //check if press is within double press window
@@ -117,7 +123,12 @@ public class PlayerBrain : MonoBehaviour
                         //execute what to change here
                         canmove = false;
                         wallglued = true;
-                        transform.forward = -hit.normal;
+
+                        //makes the player look the same way as the wall
+                        attachedWallNormal = hit.normal;
+                        attachedWallNormal.y = 0;
+                        Quaternion targetRotation = transform.rotation = Quaternion.LookRotation(attachedWallNormal);
+                        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
                         
                         //reset time and prevent anything beyond a double press
                         lasttimepressed = -999f;
@@ -128,29 +139,42 @@ public class PlayerBrain : MonoBehaviour
                         lasttimepressed = Time.time;
                     }
                 }
-                if (wallglued && Input.GetKey(KeyCode.D))
-                {
-                    controller.transform.position += transform.right / 75f;
-                }
-                if (wallglued && Input.GetKey(KeyCode.A))
-                {
-                    controller.transform.position -= transform.right / 75f;
+                if (wallglued){
+                    Vector3 wallRight = Vector3.Cross(Vector3.up, attachedWallNormal).normalized;
+                    Vector3 wallMovement = Vector3.zero;
+
+                    if (Input.GetKey(KeyCode.W))
+                        wallMovement += Vector3.forward;
+
+                    if (Input.GetKey(KeyCode.S))
+                        wallMovement -= Vector3.forward;
+
+                    if (Input.GetKey(KeyCode.D))
+                        wallMovement -= Vector3.left;
+
+                    if (Input.GetKey(KeyCode.A))
+                        wallMovement += Vector3.left;
+
+                    controller.Move(wallMovement * speed * Time.deltaTime);
                 }
                 
+                //Now the player can simply press the oposite 
+                #region GetUnglued
                 //leave wall execution
-                if (wallglued && Input.GetKeyDown(KeyCode.S))
-                {
+                //if (wallglued && Input.GetKeyDown(KeyCode.E))
+                //{
                     //double press
-                    if (Time.time - lasttimepressed <= timebetweenpress)
-                    {
-                        wallglued = false;
-                        canmove = true;
-                    }
-                    else
-                    {
-                        lasttimepressed = Time.time;
-                    }
-                }
+                    //if (Time.time - lasttimepressed <= timebetweenpress)
+                    //{
+                        //wallglued = false;
+                        //canmove = true;
+                    //}
+                    //else
+                    //{
+                        //lasttimepressed = Time.time;
+                    //}
+                //}
+                #endregion
             }
         }
         else
