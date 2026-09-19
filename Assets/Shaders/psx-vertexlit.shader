@@ -52,8 +52,8 @@ Shader "psx/vertexlit" {
 						//Affine Texture Mapping
 						float4 affinePos = vertex; //vertex;				
 						o.uv_MainTex = TRANSFORM_TEX(v.texcoord, _MainTex);
-						o.uv_MainTex *= distance + (vertex.w*(UNITY_LIGHTMODEL_AMBIENT.a * 8)) / distance / 2;
-						o.normal = distance + (vertex.w*(UNITY_LIGHTMODEL_AMBIENT.a * 8)) / distance / 2;
+						o.uv_MainTex *= distance + (vertex.w*(UNITY_LIGHTMODEL_AMBIENT.a * 16)) / distance / 2;
+						o.normal = distance + (vertex.w*(UNITY_LIGHTMODEL_AMBIENT.a * 16)) / distance / 2;
 
 						//Fog
 						float4 fogColor = unity_FogColor;

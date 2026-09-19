@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerBrain : MonoBehaviour
 {
     //player stuff
-    public GameObject rig;
+    public Camera rig;
     public Vector3 rigoffset;
     public CharacterController controller;
     public float speed = 4f;
@@ -17,7 +17,8 @@ public class PlayerBrain : MonoBehaviour
     public GameObject shouldertLeft;
     public GameObject shoulderRight;
 
-
+    private float originalfov;
+    
     //internal variables accessible across the script
     private Vector3 movement;
     private float speed_y = 0f;
@@ -57,6 +58,7 @@ public class PlayerBrain : MonoBehaviour
     private void InitializeComponents()
     {
         if(controller == null) { TryGetComponent<CharacterController>(out controller); }
+        originalfov = rig.fieldOfView;
     }
     
     //this allows the player move and everything (this allows the player to move but gravity executes the final Move call)
@@ -175,6 +177,7 @@ public class PlayerBrain : MonoBehaviour
                     {
                         sholderpeeking = true;
                         Quaternion cameraFinalAngle = Quaternion.LookRotation(-attachedWallNormal, Vector3.up);
+                        rig.fieldOfView = Mathf.Lerp(rig.fieldOfView, originalfov+10, 1f - Mathf.Exp(-cameraspeed * Time.deltaTime));
                         rig.transform.position = Vector3.Lerp(rig.transform.position, shouldertLeft.transform.position, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
                         rig.transform.rotation = Quaternion.Lerp(rig.transform.rotation, cameraFinalAngle, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
                     }
@@ -183,6 +186,7 @@ public class PlayerBrain : MonoBehaviour
                     {
                         sholderpeeking = true;
                         Quaternion cameraFinalAngle = Quaternion.LookRotation(-attachedWallNormal, Vector3.up);
+                        rig.fieldOfView = Mathf.Lerp(rig.fieldOfView, originalfov+10, 1f - Mathf.Exp(-cameraspeed * Time.deltaTime));
                         rig.transform.position = Vector3.Lerp(rig.transform.position, shoulderRight.transform.position, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
                         rig.transform.rotation = Quaternion.Lerp(rig.transform.rotation, cameraFinalAngle, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
                     }
@@ -190,6 +194,7 @@ public class PlayerBrain : MonoBehaviour
                     else
                     {
                         sholderpeeking = false;
+                        rig.fieldOfView = Mathf.Lerp(rig.fieldOfView, originalfov, 1f - Mathf.Exp(-cameraspeed * Time.deltaTime));
                         rig.transform.rotation = Quaternion.Lerp(rig.transform.rotation, cameraOgRotation, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
                     }
                 }
@@ -224,6 +229,7 @@ public class PlayerBrain : MonoBehaviour
         {
             wallglued = false;
             sholderpeeking = false;
+            rig.transform.rotation = Quaternion.Lerp(rig.transform.rotation, cameraOgRotation, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
             canmove = true;
         }
     }
