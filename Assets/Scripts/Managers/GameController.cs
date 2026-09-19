@@ -12,7 +12,26 @@ public class GameController : MonoBehaviour
     {
         player = FindFirstObjectByType<PlayerBrain>();
     }
+
+    public void AddItem(ItemType itemToAdd, int amount)
+    {
+        ItemEntry entry = items.Find(x => x.item == itemToAdd);
+
+        if (entry == null)
+        {
+            entry = new ItemEntry
+            {
+                item = itemToAdd,
+                amount = 0
+            };
+
+            items.Add(entry);
+        }
+
+        entry.amount += amount;
+    }
 }
+
 
 public enum ItemType
 {
