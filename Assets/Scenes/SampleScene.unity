@@ -434,12 +434,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61f15181806a19e4d8792ef369a0655b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rig: {fileID: 963194225}
-
+  rig: {fileID: 963194227}
+  rigoffset: {x: 0, y: 5, z: -4}
   controller: {fileID: 39243873}
   speed: 4
   gravitystrength: 12
-  cameraspeed: 4
+  cameraspeed: 5
   raycastLeft: {fileID: 1254763164}
   raycastRight: {fileID: 900980954}
   shouldertLeft: {fileID: 400085167}

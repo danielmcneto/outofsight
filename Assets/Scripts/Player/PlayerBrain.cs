@@ -11,7 +11,7 @@ public class PlayerBrain : MonoBehaviour
     public float speed = 4f;
     //never make gravitystrength negative!!! it does that in the code already
     public float gravitystrength = 12f;
-    public float cameraspeed = -5f;
+    public float cameraspeed = 5f;
     public GameObject raycastLeft;
     public GameObject raycastRight;
     public GameObject shouldertLeft;
