@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Mime;
 using UnityEngine;
 
 public class PlayerBrain : MonoBehaviour
 {
     //player stuff
     public Camera rig;
+    public int health = 0;
+    public int healthmax = 100;
     public Vector3 rigoffset;
     public CharacterController controller;
     public float speed = 4f;
@@ -16,8 +19,10 @@ public class PlayerBrain : MonoBehaviour
     public GameObject raycastRight;
     public GameObject shouldertLeft;
     public GameObject shoulderRight;
-
     private float originalfov;
+
+    [Space] [Header("UI")] [Space]
+    public UnityEngine.UI.Image healthbar;
     
     //internal variables accessible across the script
     private Vector3 movement;
@@ -39,7 +44,7 @@ public class PlayerBrain : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        InitializeComponents();
+        Initialize();
         cameraOgRotation = rig.transform.rotation;
     }
 
@@ -52,13 +57,17 @@ public class PlayerBrain : MonoBehaviour
         WallAttach();
         
         Debug.DrawRay(transform.position, Vector3.forward, Color.green);
+        
+        //update healthbar
+        healthbar.fillAmount = (float)health / healthmax;
     }
 
     //try and call all needed requirements by calling this
-    private void InitializeComponents()
+    private void Initialize()
     {
         if(controller == null) { TryGetComponent<CharacterController>(out controller); }
         originalfov = rig.fieldOfView;
+        health = healthmax;
     }
     
     //this allows the player move and everything (this allows the player to move but gravity executes the final Move call)
@@ -231,6 +240,26 @@ public class PlayerBrain : MonoBehaviour
             sholderpeeking = false;
             rig.transform.rotation = Quaternion.Lerp(rig.transform.rotation, cameraOgRotation, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
             canmove = true;
+        }
+    }
+
+    public void TakeDamage(int dmg)
+    {
+        int hpnew = health - dmg;
+        health = hpnew;
+        if (health >= 0)
+        {
+            health = 0;
+        }
+    }
+    
+    public void TakeHealth(int hp)
+    {
+        int hpnew = health + hp;
+        health = hpnew;
+        if (health >= healthmax)
+        {
+            health = healthmax;
         }
     }
 }
