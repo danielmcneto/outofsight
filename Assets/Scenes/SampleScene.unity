@@ -337,8 +337,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rig: {fileID: 963194225}
   rigoffset: {x: 0, y: 7, z: -4}
-  shoulderoffset: {x: 2.08, y: 0.8, z: -3.23}
-  shoulderAngle: {x: 0.034899496, y: 0, z: 0, w: 0.99939084}
   controller: {fileID: 39243873}
   speed: 4
   gravitystrength: 12
