@@ -283,6 +283,7 @@ MonoBehaviour:
   raycastRight: {fileID: 900980954}
   shouldertLeft: {fileID: 400085167}
   shoulderRight: {fileID: 1568016333}
+  healthbar: {fileID: 1875483014}
   canmove: 1
   sholderpeeking: 0
   wallglued: 0
@@ -13370,7 +13371,7 @@ GameObject:
   - component: {fileID: 552498305}
   - component: {fileID: 552498304}
   m_Layer: 0
-  m_Name: key (1)
+  m_Name: healthpickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Mime;
 using UnityEngine;
 
 public class PlayerBrain : MonoBehaviour
@@ -19,6 +20,9 @@ public class PlayerBrain : MonoBehaviour
     public GameObject shouldertLeft;
     public GameObject shoulderRight;
     private float originalfov;
+
+    [Space] [Header("UI")] [Space]
+    public UnityEngine.UI.Image healthbar;
     
     //internal variables accessible across the script
     private Vector3 movement;
@@ -53,6 +57,9 @@ public class PlayerBrain : MonoBehaviour
         WallAttach();
         
         Debug.DrawRay(transform.position, Vector3.forward, Color.green);
+        
+        //update healthbar
+        healthbar.fillAmount = (float)health / healthmax;
     }
 
     //try and call all needed requirements by calling this
