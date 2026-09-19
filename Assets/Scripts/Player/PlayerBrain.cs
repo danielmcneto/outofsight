@@ -12,6 +12,11 @@ public class PlayerBrain : MonoBehaviour
     //never make gravitystrength negative!!! it does that in the code already
     public float gravitystrength = 12f;
     public float cameraspeed = -5f;
+    public GameObject raycastLeft;
+    public GameObject raycastRight;
+    public GameObject shouldertLeft;
+    public GameObject shoulderRight;
+
 
     //internal variables accessible across the script
     private Vector3 movement;
@@ -23,15 +28,18 @@ public class PlayerBrain : MonoBehaviour
     
     //bools to control what the player can or cant do
     public bool canmove = true;
+    public bool sholderpeeking = false;
     public bool wallglued = false;
 
     //IMPORTANT used to get the wall normals
     private Vector3 attachedWallNormal;
+    private Quaternion cameraOgRotation;
     
     // Start is called before the first frame update
     void Start()
     {
         InitializeComponents();
+        cameraOgRotation = rig.transform.rotation;
     }
 
     // Update is called once per frame
@@ -61,17 +69,23 @@ public class PlayerBrain : MonoBehaviour
             if (Input.GetKey(KeyCode.A)) movement -= rig.transform.right;
             if (Input.GetKey(KeyCode.S)) movement -= rig.transform.forward;
             if (Input.GetKey(KeyCode.D)) movement += rig.transform.right;
+
         }
 
         //keep movement horizontal
         movement.y = 0f;
+
+        if (!sholderpeeking)
+        {
+            //calculate camera offset
+            Vector3 camerafinalposition = transform.position + rigoffset;
+
+            //camera follow
+            rig.transform.position = Vector3.Lerp(rig.transform.position, camerafinalposition, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
+        }
         
-        //calculate camera offset
-        Vector3 camerafinalposition = transform.position + rigoffset;
         
-        //camera follow
-        rig.transform.position = Vector3.Lerp(rig.transform.position, camerafinalposition, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
-        
+
         //if the player is actually inputting something in via wasd
         if (movement != Vector3.zero)
         {
@@ -140,7 +154,6 @@ public class PlayerBrain : MonoBehaviour
                     }
                 }
                 if (wallglued){
-                    Vector3 wallRight = Vector3.Cross(Vector3.up, attachedWallNormal).normalized;
                     Vector3 wallMovement = Vector3.zero;
 
                     if (Input.GetKey(KeyCode.W))
@@ -156,9 +169,39 @@ public class PlayerBrain : MonoBehaviour
                         wallMovement += Vector3.left;
 
                     controller.Move(wallMovement * speed * Time.deltaTime);
+
+                    // Peek from the left shoulder when that side is clear.
+                    if(!Physics.Raycast(raycastLeft.transform.position, rayDirection, out RaycastHit hitshoulderLeft, 0.75f))
+                    {
+                        sholderpeeking = true;
+                        Quaternion cameraFinalAngle = Quaternion.LookRotation(-attachedWallNormal, Vector3.up);
+                        rig.transform.position = Vector3.Lerp(rig.transform.position, shouldertLeft.transform.position, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
+                        rig.transform.rotation = Quaternion.Lerp(rig.transform.rotation, cameraFinalAngle, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
+                    }
+                    // Otherwise peek from the right shoulder when that side is clear.
+                    else if(!Physics.Raycast(raycastRight.transform.position, rayDirection, out RaycastHit hitshoulderRight, 0.75f))
+                    {
+                        sholderpeeking = true;
+                        Quaternion cameraFinalAngle = Quaternion.LookRotation(-attachedWallNormal, Vector3.up);
+                        rig.transform.position = Vector3.Lerp(rig.transform.position, shoulderRight.transform.position, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
+                        rig.transform.rotation = Quaternion.Lerp(rig.transform.rotation, cameraFinalAngle, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
+                    }
+                    // Stop peeking and restore the original camera rotation when both sides are blocked.
+                    else
+                    {
+                        sholderpeeking = false;
+                        rig.transform.rotation = Quaternion.Lerp(rig.transform.rotation, cameraOgRotation, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
+                    }
                 }
+                else
+                {
+                    sholderpeeking = false;
+                    rig.transform.rotation = Quaternion.Lerp(rig.transform.rotation, cameraOgRotation, 1 - Mathf.Exp(-cameraspeed * Time.deltaTime));
+                }
+
                 
-                //Now the player can simply press the oposite 
+                
+                //Now the player can simply press the oposite key
                 #region GetUnglued
                 //leave wall execution
                 //if (wallglued && Input.GetKeyDown(KeyCode.E))
@@ -180,6 +223,7 @@ public class PlayerBrain : MonoBehaviour
         else
         {
             wallglued = false;
+            sholderpeeking = false;
             canmove = true;
         }
     }
