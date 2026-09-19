@@ -17,11 +17,10 @@ Shader "oos/oos-map"
         Pass
         {
             CGPROGRAM
-
+            
             #pragma vertex vert_img
             #pragma fragment frag
             #include "UnityCG.cginc"
-
             sampler2D _MainTex;
             float4 _Green;
             float _Brightness;
@@ -31,7 +30,7 @@ Shader "oos/oos-map"
             {
                 fixed4 col = tex2D(_MainTex, i.uv);
                 //grayscale the image
-                float gray = dot(col.rgb, float3(0.299, 0.587, 0.114));
+                float gray = dot(col.rgb, float3(0.3, 0.6, 0.1));
                 //contrast
                 gray = (gray - 0.5) * _Contrast + 0.5;
                 //brightness
