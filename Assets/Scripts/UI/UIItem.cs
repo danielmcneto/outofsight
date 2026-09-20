@@ -18,10 +18,11 @@ public class UIItem : MonoBehaviour
     {
         //find gamecontroller to fetch from
         gc = FindAnyObjectByType<GameController>();
+        item = gc.items[itemnumber];
         
+        //set initial icon and count
         itemicon.texture = item.icon;
         count.text = item.amount.ToString();
-        item = gc.items[itemnumber];
     }
 
     private void Update()
