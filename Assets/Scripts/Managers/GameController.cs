@@ -44,4 +44,5 @@ public class ItemEntry
 {
     public ItemType item;
     public int amount = 0;
+    public Texture2D icon;
 }
