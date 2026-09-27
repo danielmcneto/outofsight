@@ -4,37 +4,77 @@ using UnityEngine;
 
 public class EnemyBrain : MonoBehaviour
 {
-    public Transform target;
+    [SerializeField] private float damageInterval = 0.3f;
+    [SerializeField] private int damageAmount = 1;
+    private float nextDamageTime;
+    private bool wasPlayerDetected;
+    public Transform player;
+    public Transform[] targets;
     private EnemyBase enemybase;
-    private float stopdistance;
+    public float stopdistance;
     private float pathupdatefinishline;
+    private int currentTarget = 0;
+    private DetectPlayer detectPlayer;
+    public MeshCollider visionMesh;
     
     // Start is called before the first frame update
     void Start()
     {
-        target = GameObject.FindGameObjectWithTag("Player").transform;
+        
+        player = GameObject.FindGameObjectWithTag("Player").transform;
         enemybase = GetComponent<EnemyBase>();
         stopdistance = enemybase.agent.stoppingDistance;
+        detectPlayer = visionMesh.GetComponent<DetectPlayer>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (target != null)
+        bool detected = detectPlayer != null && detectPlayer.PlayerInVision;
+
+        if (detected)
         {
-            bool inenemyrange = Vector3.Distance(transform.position, target.position) <= stopdistance;
+            if (!wasPlayerDetected)
+                nextDamageTime = Time.time + damageInterval;
+
+            wasPlayerDetected = true;
+
+            if (Time.time >= nextDamageTime)
+            {
+                player.GetComponent<PlayerBrain>().TakeDamage(damageAmount);
+                nextDamageTime = Time.time + damageInterval;
+            }
+
+            UpdatePath(player);
+            return;
+        }
+        else
+        {
+            wasPlayerDetected = false;
+        }
+
+
+        if (player != null)
+        {
+            
+            bool inenemyrange = Vector3.Distance(transform.position, player.position) <= stopdistance;
             if (inenemyrange)
             {
-                LookAtTarget();
+                LookAtTarget(targets[currentTarget]);
+                return;
             }
-            else
+
+            var agent = enemybase.agent;
+            if(!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
             {
-                UpdatePath();
+                currentTarget = (currentTarget + 1) % targets.Length;
+                UpdatePath(targets[currentTarget]);
             }
+            
         }
     }
     
-    private void LookAtTarget()
+    private void LookAtTarget(Transform target)
     {
         Vector3 look = target.position - transform.position;
         look.y = 0;
@@ -42,7 +82,7 @@ public class EnemyBrain : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, rotation, 0.2f);
     }
 
-    private void UpdatePath()
+    private void UpdatePath(Transform target)
     {
         if (Time.time >= pathupdatefinishline)
         {
