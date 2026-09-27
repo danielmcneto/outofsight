@@ -230,7 +230,7 @@ GameObject:
   - component: {fileID: 39243871}
   - component: {fileID: 39243872}
   - component: {fileID: 39243873}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -15199,7 +15199,7 @@ GameObject:
   - component: {fileID: 1196569767}
   m_Layer: 0
   m_Name: Enemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -15220,7 +15220,7 @@ NavMeshAgent:
   m_AngularSpeed: 120
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 1
+  m_AutoBraking: 0
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 1
@@ -15252,13 +15252,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f634a37b10e1de440bcf9aa0e9b2ad93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  damageInterval: 0.3
+  damageAmount: 1
   player: {fileID: 0}
   targets:
   - {fileID: 144266634}
   - {fileID: 1216892247}
   - {fileID: 2087743210}
   - {fileID: 1510858504}
-  stopdistance: 0.5
+  stopdistance: 0
   visionMesh: {fileID: 1992606978}
 --- !u!23 &1196569762
 MeshRenderer:
@@ -15342,6 +15344,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agent: {fileID: 1196569759}
   updatedelay: 0.25
+  health: 60
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 65
 --- !u!54 &1196569767
 Rigidbody:
   m_ObjectHideFlags: 0
