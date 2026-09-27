@@ -8,6 +8,10 @@ public class HealthPickup : MonoBehaviour
     public int amount = 20;
     private void OnTriggerEnter(Collider other)
     {
+        if(!other.CompareTag("Player"))
+        {
+            return;
+        }
         //heal the player
         PlayerBrain player = FindObjectOfType<PlayerBrain>();
         player.TakeHealth(amount);

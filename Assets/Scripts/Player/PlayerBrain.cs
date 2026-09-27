@@ -247,7 +247,7 @@ public class PlayerBrain : MonoBehaviour
     {
         int hpnew = health - dmg;
         health = hpnew;
-        if (health >= 0)
+        if (health <= 0)
         {
             health = 0;
         }
