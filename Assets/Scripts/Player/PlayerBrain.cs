@@ -21,6 +21,11 @@ public class PlayerBrain : MonoBehaviour
     public GameObject shoulderRight;
     private float originalfov;
 
+    [Space] [Header("Gun")] [Space]
+    public int damage;
+    //public float fireRate; we will use this if we want to make an automatic gun, rn the player is like with a semi auto more like a pistol yk?
+    
+
     [Space] [Header("UI")] [Space]
     public UnityEngine.UI.Image healthbar;
     
@@ -56,7 +61,7 @@ public class PlayerBrain : MonoBehaviour
         Gravity(movement);
         WallAttach();
         
-        if(Input.GetMouseButton(0))
+        if(Input.GetMouseButtonDown(0))
         {
             shooting();
         }
@@ -257,7 +262,7 @@ public class PlayerBrain : MonoBehaviour
         {
             if (hit.collider.CompareTag("Enemy"))
             {
-                hit.collider.GetComponent<EnemyBrain>().TakeDamage(20);
+                hit.collider.GetComponent<EnemyBrain>().TakeDamage(damage);
             }
         }
     }
