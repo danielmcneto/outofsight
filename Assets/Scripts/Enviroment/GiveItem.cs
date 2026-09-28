@@ -6,10 +6,12 @@ public class GiveItem : MonoBehaviour
 {
     public GameController gc;
     public ItemType itemToGive;
+    public Sprite icon;
     public int amount = 1;
     // Start is called before the first frame update
     private void Start()
     {
+        
         gc = FindFirstObjectByType<GameController>();
     }
 
@@ -19,6 +21,7 @@ public class GiveItem : MonoBehaviour
         {
             return;
         }
+
         gc.AddItem(itemToGive, amount);
 
         //initiate pickup routine
@@ -41,7 +44,12 @@ public class GiveItem : MonoBehaviour
             transform.position = Vector3.Lerp(start, end, t);
             yield return null;
         }
-        
+        UIItem[] allUI = FindObjectsByType<UIItem>(FindObjectsSortMode.None);
+        foreach (UIItem uiSlot in allUI)
+        {
+            uiSlot.UpdateSlotUI();
+        }
         Destroy(gameObject);
     }
+
 }

@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class HealthPickup : MonoBehaviour
 {
+
     public int amount = 20;
     private void OnTriggerEnter(Collider other)
     {

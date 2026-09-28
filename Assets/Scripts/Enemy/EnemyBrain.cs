@@ -16,33 +16,50 @@ public class EnemyBrain : MonoBehaviour
     private int currentTarget = 0;
     private DetectPlayer detectPlayer;
     public MeshCollider visionMesh;
+    private float maxHealth;
+    private float health;
+    private LayerMask playerLayer;
+    private float speed;
     
     // Start is called before the first frame update
     void Start()
     {
         
         player = GameObject.FindGameObjectWithTag("Player").transform;
-        enemybase = GetComponent<EnemyBase>();
+        enemybase = GetComponent<EnemyBase>(); 
+        playerLayer = enemybase.playerLayer;
         stopdistance = enemybase.agent.stoppingDistance;
+        speed = enemybase.agent.speed;
+        maxHealth = enemybase.health;
+        health = maxHealth;
         detectPlayer = visionMesh.GetComponent<DetectPlayer>();
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-        bool detected = detectPlayer != null && detectPlayer.PlayerInVision;
+        bool detected = false;
 
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, transform.forward, out hit, 10, playerLayer))
+        {
+            detected = hit.collider.CompareTag("Player");
+        }
+        //bool detected = Physics.Raycast(transform.position, transform.forward, out hit, 10, playerLayer);
+        
         if (detected)
         {
+            enemybase.agent.speed = 0;
             if (!wasPlayerDetected)
                 nextDamageTime = Time.time + damageInterval;
 
             wasPlayerDetected = true;
+            LookAtTarget(player);
 
             if (Time.time >= nextDamageTime)
             {
-                player.GetComponent<PlayerBrain>().TakeDamage(damageAmount);
-                nextDamageTime = Time.time + damageInterval;
+                Shoot();
             }
 
             UpdatePath(player);
@@ -50,6 +67,7 @@ public class EnemyBrain : MonoBehaviour
         }
         else
         {
+            enemybase.agent.speed = speed;
             wasPlayerDetected = false;
         }
 
@@ -73,6 +91,29 @@ public class EnemyBrain : MonoBehaviour
             
         }
     }
+
+    private void Shoot()
+    {
+        Debug.Log("enter shoot");
+        RaycastHit hit;
+        
+        if (Physics.Raycast(transform.position, transform.forward, out hit, 10, playerLayer))
+        {
+            if (hit.collider.CompareTag("Player"))
+            {
+                Debug.Log("hitplayer");
+                player.GetComponent<PlayerBrain>().TakeDamage(damageAmount);
+                nextDamageTime = Time.time + damageInterval;
+            }
+            else
+            {
+                UpdatePath(player);
+            }
+            
+        }
+
+        Debug.DrawRay(transform.position, transform.forward * 10, Color.red);
+    }
     
     private void LookAtTarget(Transform target)
     {
@@ -89,6 +130,17 @@ public class EnemyBrain : MonoBehaviour
             //update enemy path
             pathupdatefinishline = Time.time + enemybase.updatedelay;
             enemybase.agent.SetDestination(target.position);
+        }
+    }
+
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+        Debug.Log("Take damage:" + damage);
+        if(health <= 0)
+        {
+            Debug.Log("Im dead");
+            health = 0;
         }
     }
 }

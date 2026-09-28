@@ -7,6 +7,8 @@ public class EnemyBase : MonoBehaviour
 {
     public NavMeshAgent agent;
     public float updatedelay = 0.25f;
+    public float health;
+    public LayerMask playerLayer;
     
     void Start()
     {
